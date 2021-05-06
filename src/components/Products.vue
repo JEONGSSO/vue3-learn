@@ -19,7 +19,13 @@ import { toRefs, defineComponent } from 'vue';
 
 export default defineComponent({
   props: {
-    products: Array,
+    products: {
+      type: Array,
+      required: true
+      // validator: (value: string) => {
+      //   return ['id'].includes(value);
+      // }
+    },
     filters: Object,
     lastPage: Number
   },

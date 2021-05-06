@@ -7,6 +7,12 @@
 <script lang="ts">
 import { ref, reactive, onMounted, defineComponent } from 'vue';
 
+interface Filters {
+  keyword: string;
+  sortType: string;
+  page: number;
+}
+
 import Products from './Products.vue';
 
 export default defineComponent({
@@ -21,7 +27,7 @@ export default defineComponent({
     const lastPage = ref(0);
     const perPage = ref(9);
 
-    const filters = reactive({
+    const filters: Filters = reactive({
       keyword: '',
       sortType: '',
       page: 1
@@ -38,7 +44,7 @@ export default defineComponent({
 
     onMounted(initData);
 
-    const productsChange = f => {
+    const productsChange = (f: Filters) => {
       filters.keyword = f.keyword;
       filters.sortType = f.sortType;
       filters.page = f.page;
@@ -53,9 +59,10 @@ export default defineComponent({
       filterProducts.value = products.slice(0, filters.page * perPage.value);
     };
 
-    const sort = (sortType, products) => [...products].sort((a, b) => (sortType === 'asc' ? a.id - b.id : b.id - a.id));
+    const sort = (sortType: string, products: Array<Object>) =>
+      [...products].sort((a: any, b: any) => (sortType === 'asc' ? a.id - b.id : b.id - a.id));
 
-    const search = keyword => allProducts.value.filter(({ title }) => ~title.indexOf(keyword));
+    const search = (keyword: string) => allProducts.value.filter(({ title }) => ~title.indexOf(keyword));
 
     return {
       sort,
