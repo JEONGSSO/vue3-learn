@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div>
     <input type="text" name="search" @keyup="search($event.target.value)" />
     <select name="sort" @change="sort($event.target.value)">
       <option value="asc">asc</option>
@@ -11,7 +11,7 @@
       <p>{{ product.title }}</p>
     </li>
   </ul>
-  <button class="btn" @click="showMore" v-if="filters.page < lastPage">lead more</button>
+  <button class="btn" @click="showMore" v-show="filters.page < lastPage">lead more</button>
 </template>
 
 <script lang="ts">
@@ -75,5 +75,11 @@ export default defineComponent({
       background-color: wheat;
     }
   }
+}
+
+.btn {
+  width: 200px;
+  height: 50px;
+  background-color: red;
 }
 </style>

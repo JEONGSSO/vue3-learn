@@ -2,18 +2,17 @@
   <section class="section_wrap">
     <Products :products="filterProducts" :filters="filters" :lastPage="lastPage" @set-filters="productsChange" />
   </section>
+  <button class="btn" @click="stopWatchHandler">stopWatchHandler</button>
 </template>
 
 <script lang="ts">
-import { ref, reactive, onMounted, defineComponent } from 'vue';
-
-interface Filters {
-  keyword: string;
-  sortType: string;
-  page: number;
-}
+import { watch, watchEffect, defineComponent } from 'vue';
 
 import Products from './Products.vue';
+
+import * as getProducts from '../composables/getProducts';
+
+import { Filters } from '../types/Products';
 
 export default defineComponent({
   name: 'HelloWorld',
@@ -21,33 +20,33 @@ export default defineComponent({
     Products
   },
   setup() {
-    const allProducts = ref([]);
-    const filterProducts = ref([]);
+    const { lastPage, perPage, filters, allProducts, filterProducts } = getProducts.default();
 
-    const lastPage = ref(0);
-    const perPage = ref(9);
-
-    const filters: Filters = reactive({
-      keyword: '',
-      sortType: '',
-      page: 1
+    const stopWatch = watch(filters, (e, ee, eee) => {
+      console.log('stopWatch e', e);
+      console.log('stopWatch ee', ee);
+      console.log('stopWatch eee', eee);
     });
 
-    const initData = async () => {
-      const data = await fetch('https://jsonplaceholder.typicode.com/todos').then(res => res.json());
-      allProducts.value = data;
+    watchEffect(() => {
+      // useEffect 같은 역할
+      console.log('watchEffect', filters);
+    });
 
-      filterProducts.value = data.slice(0, filters.page * perPage.value);
-
-      lastPage.value = Math.ceil(data.length / perPage.value);
+    const stopWatchHandler = () => {
+      console.log('stopWatchHandler');
+      stopWatch();
     };
-
-    onMounted(initData);
 
     const productsChange = (f: Filters) => {
       filters.keyword = f.keyword;
       filters.sortType = f.sortType;
       filters.page = f.page;
+
+      const sort = (sortType: string, products: Array<Object>) =>
+        [...products].sort((a: any, b: any) => (sortType === 'asc' ? a.id - b.id : b.id - a.id));
+
+      const search = (keyword: string) => allProducts.value.filter(({ title }) => ~title.indexOf(keyword));
 
       let products = search(filters.keyword);
 
@@ -59,19 +58,11 @@ export default defineComponent({
       filterProducts.value = products.slice(0, filters.page * perPage.value);
     };
 
-    const sort = (sortType: string, products: Array<Object>) =>
-      [...products].sort((a: any, b: any) => (sortType === 'asc' ? a.id - b.id : b.id - a.id));
-
-    const search = (keyword: string) => allProducts.value.filter(({ title }) => ~title.indexOf(keyword));
-
     return {
-      sort,
-      search,
-      allProducts,
-      filterProducts,
-      filters,
+      ...getProducts.default(),
+      stopWatchHandler,
       productsChange,
-      lastPage
+      filterProducts
     };
   }
 });
@@ -79,4 +70,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import './test.scss';
+
+.btn {
+  width: 200px;
+  height: 50px;
+  background-color: red;
+}
 </style>
